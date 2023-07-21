@@ -6,15 +6,15 @@ categories: [日志, 编程语言, Java]
 tags: [编程语言, Java]
 ---
 
-记得自己刚接触 Java 那会，有两个东西总是傻傻分不清，一个是 **Nested Class**，翻译过来叫做 **嵌套类**，另外一个是 **Inner Class**，翻译过来是 **内部类**。咦，嵌套不就相当于一个东西在另一个东西内部吗？光听名字我相信你也很难对他们区别一二，但其实这两个在 Java 底层的实现方式完全不一样。
+记得自己刚接触 Java 那会，有两个东西总是傻傻分不清，一个是 **Nested Class**，翻译过来叫做 **嵌套类**，另外一个是 **Inner Class**，翻译过来是 **内部类**。咦，嵌套不就相当于一个东西在另一个东西内部吗？光听名字我相信你也很难对他们区别一二，但其实这两个还是有很大区别的。
 
 <br>
 
-**在说一个技术时，我们最好结合一些问题来看，这样比较容易理解这个技术出现的原因**。在 Java 中，一切都是对象，类在 Java 中的地位应该不用我多说。我们经常熟知的是，类中可以定义变量，方法，那类中是否可以定义其他的类呢？答案是当然可以，毕竟类在 Java 中的地方是非常之高。如果说可以的话，那么这的确给类的使用带来诸多的灵活性，可问题也随之而来。我们知道，类是一个模块，为了方便对其管理，我们会对其中的内容进行权限的设定，比如按照惯例，类中的变量我们会设置为私有（private），方法在多数情况下会设置为公有（public）。如果我们允许在类中定义类的话，那么这两个类的权限该如何设定？**也就是说，这两个类中的成员和方法该怎样相互访问？**
+**在说一个技术时，我们最好结合一些问题来看，这样比较容易理解这个技术出现的原因**。在 Java 中，一切都是对象，类在 Java 中的地位应该不用我多说。我们经常熟知的是，类中可以定义变量，方法，那类中是否可以定义其他的类呢？答案是当然可以，毕竟类在 Java 中的地位是非常之高。如果说可以的话，那么这的确给类的使用带来诸多的灵活性，可问题也随之而来。我们知道，类是一个模块，为了方便对其管理，我们会对其中的内容进行权限的设定，比如按照惯例，类中的变量我们会设置为私有（private），方法在多数情况下会设置为公有（public）。如果我们允许在类中定义类的话，那么这两个类的权限该如何设定？**也就是说，这两个类中的成员和方法该怎样相互访问？**
 
 <br>
 
-为了清楚地表述，我们以实现 Java 中的 `ArrayList` 为例，一开始我们先定义两个类：
+我们以实现 Java 中的 `ArrayList` 为例，为了清楚地表述，一开始我们先定义分开的两个类：
 
 ```java
 public class ArrayList<AnyType> implements Iterable<AnyType> {
@@ -50,7 +50,7 @@ class ArrayListIterator<AnyType> implements java.util.Iterator<AnyType> {
 虽然说上面的代码可以正常的编译和运行，但是其中隐藏着诸多问题，我们一一来看：
 
 - `ArrayList` 和 `ArrayListIterator` 是分开的两个类，但是从从属关系来看，`ArrayListIterator` 从属于 `ArrayList`。也就是说 `ArrayListIterator` 仅仅会被 `ArrayList` 所使用，而当前的权限定义表明，`ArrayListIterator` 还可以被其他的类所使用，这其实传递了错误的信号
-- `ArrayListIterator` 没法很好的获取 `ArrayList` 的信息，构建 `ArrayListIterator` 还需要手动传入 `ArrayList` 对象，这使得类的某些实现变得复杂，比如 `theList.getItems().theItems[current++]` 
+- `ArrayListIterator` 没法很好的获取 `ArrayList` 的成员信息，构建 `ArrayListIterator` 还需要手动传入 `ArrayList` 对象，这使得类的某些实现变得复杂，比如 `theList.getItems().theItems[current++]` 
 - 对于 `ArrayList` 的使用者来说，需要维护 `ArrayList` 和 `ArrayListIterator` 这层关系，单一情况还好，当我们有多个 `ArrayListIterator` 和多个 `ArrayList` 对象时，情况就会变得相当复杂
 
 <br>
@@ -86,7 +86,7 @@ public class ArrayList<AnyType> implements Iterable<AnyType> {
 
 首先，对于嵌套类，我们必须使用 `static` 关键字指明它为嵌套类，简单解释就是，**嵌套类只是嵌套在类中，它是类的东西，和类所生成的对象无关**。相比于之前，它有以下的提升：
 
-- 我们可以把嵌套类的访问权限设定为私有，这样，`ArrayListIterator` 只能由 `ArrayList` 的方法或成员访问。其对外不可见，降低了外部的复杂度
+- 我们可以把嵌套类的访问权限设定为私有，这样，`ArrayListIterator` 只能由 `ArrayList` 中的方法或成员访问。其对外不可见，降低了外部的复杂度
 - 另外，`ArrayListIterator` 是 `ArrayList` 的成员，因而它能对 `ArrayList` 的成员进行访问，这多少降低了其功能实现的复杂度
 
 但是，**嵌套类** 被用在此处还是有些问题：
